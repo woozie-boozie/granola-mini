@@ -1,0 +1,35 @@
+{
+  "name": "granola-mini",
+  "version": "0.1.0",
+  "description": "A tiny meeting-transcription desktop app — system + mic audio capture on macOS, live streaming transcription, speaker attribution, and evals.",
+  "main": "./out/main/index.js",
+  "author": "Akhil Madan",
+  "license": "MIT",
+  "scripts": {
+    "build:native": "bash scripts/build-native.sh",
+    "dev": "npm run build:native && electron-vite dev",
+    "build": "npm run build:native && electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "cli": "npm run build:native && node --import tsx scripts/cli-transcribe.ts"
+  },
+  "dependencies": {
+    "@deepgram/sdk": "^3.9.0",
+    "bufferutil": "^4.1.0",
+    "dotenv": "^16.4.5",
+    "utf-8-validate": "^6.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.0",
+    "electron-vite": "^2.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  }
+}
