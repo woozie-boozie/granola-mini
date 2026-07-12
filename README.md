@@ -14,7 +14,7 @@ The transcription stack of a meeting app, built end-to-end:
 
 **See it work in ~2 minutes:** `npm install && npm run dev`, hit **Start**, play any audio and talk over it — both channels (mic + system audio) transcribe live, with speaker attribution and WER/latency scoring. Full steps in [Setup](#setup) below.
 
-_A 90-second screen recording is available on request._
+**▶ [Watch the 2-minute demo video](https://www.loom.com/share/4e9cbb4005264c168d890e80c5932d49)** — capture, live transcription, backend switch, notes, and evals.
 
 ## Implementation
 
