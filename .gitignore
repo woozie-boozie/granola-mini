@@ -4,5 +4,6 @@ dist/
 .env
 native/systemaudio
 native/miccapture
+models/
 *.log
 .DS_Store

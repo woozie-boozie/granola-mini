@@ -57,6 +57,18 @@ body { background: var(--bg); color: var(--ink); overflow: hidden; }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn.small { padding: 7px 12px; font-size: 12px; }
 
+/* ── provider toggle (cloud Deepgram vs local Whisper) ── */
+.provider { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg {
+  border: 0; background: transparent; color: var(--muted);
+  font-size: 12px; font-weight: 550; padding: 8px 12px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.seg + .seg { border-left: 1px solid var(--line); }
+.seg:hover:not(:disabled) { color: var(--ink); }
+.seg.active { background: var(--panel-2); color: var(--ink); }
+.seg:disabled { cursor: default; opacity: 0.65; }
+
 /* ── metrics ── */
 .metrics {
   display: grid;
@@ -104,6 +116,29 @@ body { background: var(--bg); color: var(--ink); overflow: hidden; }
 .line.interim .words { color: var(--muted); font-style: italic; }
 
 /* ── evals ── */
+/* ── notes (Granola-style summary) ── */
+.notes {
+  border-top: 1px solid var(--line);
+  padding: 16px 20px;
+  background: var(--panel);
+}
+.notes-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.notes-head h2 { font-size: 13px; font-weight: 650; }
+.notes-body {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--you);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .evals {
   border-top: 1px solid var(--line);
   padding: 16px 20px;

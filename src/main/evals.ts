@@ -80,6 +80,11 @@ export class LatencyTracker {
     if (this.samples.length > this.cap) this.samples.shift()
   }
 
+  /** Clear samples — called on each new capture so provider switches read cleanly. */
+  reset(): void {
+    this.samples = []
+  }
+
   get average(): number {
     if (!this.samples.length) return 0
     return Math.round(this.samples.reduce((a, b) => a + b, 0) / this.samples.length)

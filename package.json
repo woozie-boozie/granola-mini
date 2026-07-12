@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build:native": "bash scripts/build-native.sh",
+    "download-model": "bash scripts/download-model.sh",
     "dev": "npm run build:native && electron-vite dev",
     "build": "npm run build:native && electron-vite build",
     "start": "electron-vite preview",
@@ -14,6 +15,7 @@
     "cli": "npm run build:native && node --import tsx scripts/cli-transcribe.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.111.0",
     "@deepgram/sdk": "^3.9.0",
     "bufferutil": "^4.1.0",
     "dotenv": "^16.4.5",

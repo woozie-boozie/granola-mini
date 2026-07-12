@@ -22,6 +22,8 @@ let SEG_ID = 0
 
 export function App() {
   const [capturing, setCapturing] = useState(false)
+  const [provider, setProvider] = useState<'deepgram' | 'whisper'>('deepgram')
+  const [starting, setStarting] = useState(false)
   const [segments, setSegments] = useState<Segment[]>([])
   const [interim, setInterim] = useState<Interim>({ you: '', them: '' })
   const [statusLine, setStatusLine] = useState('idle — press Start to capture this meeting')
@@ -30,11 +32,14 @@ export function App() {
   const [wer, setWer] = useState<null | {
     wer: number; substitutions: number; deletions: number; insertions: number; referenceWords: number
   }>(null)
+  const [notes, setNotes] = useState<string | null>(null)
+  const [notesLoading, setNotesLoading] = useState(false)
 
   const transcriptRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const offT = window.granola.onTranscript((e) => {
+      if (e.latencyAvg !== undefined) setLatency({ avg: e.latencyAvg, p95: e.latencyP95 ?? 0 })
       if (e.isFinal) {
         setSegments((prev) => [...prev, { id: SEG_ID++, channel: e.channel, speaker: e.speaker, text: e.text }])
         setInterim((prev) => ({ ...prev, [e.channel]: '' }))
@@ -67,12 +72,30 @@ export function App() {
       setCapturing(false)
       return
     }
-    const res = await window.granola.start()
+    setStarting(true)
+    const res = await window.granola.start(provider)
+    setStarting(false)
     if (res.ok) {
       setCapturing(true)
     } else {
       setStatusLine(res.error ?? 'failed to start')
     }
+  }
+
+  async function makeNotes() {
+    setNotesLoading(true)
+    setNotes(null)
+    const res = await window.granola.generateNotes(fullTranscript)
+    setNotesLoading(false)
+    if (res.ok && res.notes) setNotes(res.notes)
+    else setStatusLine(res.error ?? 'notes generation failed')
+  }
+
+  function loadSampleReference() {
+    // Prefill the reference with the plain spoken words (no speaker labels) — same
+    // shape as the scored hypothesis — so one click gives a clean baseline. Edit a
+    // word and re-score to watch WER move.
+    setReference(segments.map((s) => s.text).join(' '))
   }
 
   async function scoreTranscript() {
@@ -85,6 +108,7 @@ export function App() {
     setSegments([])
     setInterim({ you: '', them: '' })
     setWer(null)
+    setNotes(null)
   }
 
   const hasInterim = interim.you || interim.them
@@ -98,8 +122,30 @@ export function App() {
           <span className="subtitle">system + mic transcription · macOS</span>
         </div>
         <div className="controls">
-          <button className={capturing ? 'btn stop' : 'btn start'} onClick={toggleCapture}>
-            {capturing ? '■ Stop' : '● Start'}
+          <div className="provider" role="group" aria-label="Transcription provider">
+            <button
+              className={provider === 'deepgram' ? 'seg active' : 'seg'}
+              onClick={() => setProvider('deepgram')}
+              disabled={capturing || starting}
+              title="Streaming cloud transcription"
+            >
+              Cloud · Deepgram
+            </button>
+            <button
+              className={provider === 'whisper' ? 'seg active' : 'seg'}
+              onClick={() => setProvider('whisper')}
+              disabled={capturing || starting}
+              title="On-device transcription — whisper.cpp"
+            >
+              Local · Whisper
+            </button>
+          </div>
+          <button
+            className={capturing ? 'btn stop' : 'btn start'}
+            onClick={toggleCapture}
+            disabled={starting}
+          >
+            {capturing ? '■ Stop' : starting ? '… Loading' : '● Start'}
           </button>
           <button className="btn ghost" onClick={clearAll} disabled={capturing}>
             Clear
@@ -155,6 +201,16 @@ export function App() {
         )}
       </main>
 
+      <section className="notes">
+        <div className="notes-head">
+          <h2>Notes · Granola-style</h2>
+          <button className="btn small" onClick={makeNotes} disabled={!segments.length || notesLoading}>
+            {notesLoading ? 'Writing notes…' : '✨ Generate notes'}
+          </button>
+        </div>
+        {notes && <div className="notes-body">{notes}</div>}
+      </section>
+
       <section className="evals">
         <div className="evals-head">
           <h2>Evals · Word Error Rate</h2>
@@ -166,6 +222,9 @@ export function App() {
           onChange={(e) => setReference(e.target.value)}
         />
         <div className="evals-actions">
+          <button className="btn small ghost" onClick={loadSampleReference} disabled={!segments.length}>
+            Load sample
+          </button>
           <button className="btn small" onClick={scoreTranscript} disabled={!reference || !segments.length}>
             Score against transcript
           </button>

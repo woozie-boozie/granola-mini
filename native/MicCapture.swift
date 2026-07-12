@@ -28,6 +28,11 @@ final class MicCapture {
 
     func start() {
         let input = engine.inputNode
+        // Note: AVAudioEngine's Voice Processing I/O (setVoiceProcessingEnabled) does
+        // acoustic echo cancellation, but on macOS it takes over the shared audio device
+        // and ducks the system output — which mutes and starves the far-side channel this
+        // app captures via ScreenCaptureKit. Proper AEC for a meeting app needs software
+        // cancellation using the captured system audio as the reference signal; see README.
         let inputFormat = input.outputFormat(forBus: 0)
         guard inputFormat.sampleRate > 0 else {
             log("no microphone input available"); exit(1)

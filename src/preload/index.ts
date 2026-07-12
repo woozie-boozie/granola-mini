@@ -6,6 +6,10 @@ export interface TranscriptEvent {
   isFinal: boolean
   speaker?: number
   latencyMs?: number
+  // Rolling aggregates, attached to every transcript so the UI tiles update live
+  // (not just when an occasional status message fires).
+  latencyAvg?: number
+  latencyP95?: number
 }
 
 export interface StatusEvent {
@@ -23,11 +27,20 @@ export interface WerResult {
   hits: number
 }
 
+export interface NotesResult {
+  ok: boolean
+  notes?: string
+  error?: string
+}
+
 const api = {
-  start: (): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke('capture:start'),
+  start: (provider: 'deepgram' | 'whisper' = 'deepgram'): Promise<{ ok: boolean; error?: string }> =>
+    ipcRenderer.invoke('capture:start', provider),
   stop: (): Promise<{ ok: boolean }> => ipcRenderer.invoke('capture:stop'),
   scoreWER: (reference: string, hypothesis: string): Promise<WerResult> =>
     ipcRenderer.invoke('evals:wer', reference, hypothesis),
+  generateNotes: (transcript: string): Promise<NotesResult> =>
+    ipcRenderer.invoke('notes:generate', transcript),
   onTranscript: (cb: (e: TranscriptEvent) => void) => {
     const h = (_e: unknown, data: TranscriptEvent) => cb(data)
     ipcRenderer.on('transcript', h)
